@@ -1,0 +1,371 @@
+<!DOCTYPE HTML>
+
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+
+<div class="pageContainer">
+
+	<div id="startButtons">
+		<button id="AI" class="button" onclick="myJsFunction1(this.id)">Play against AI</button>
+		<button id="Multiplayer" class="button" onclick="myJsFunction1(this.id)">Play with a friend</button>
+	</div>
+
+	<div id="chooseLevel">
+	<h1>Pick a level</h1>
+		<button id="easy" class="button" onclick="myJsFunction2(this.id)">Easy</button>
+		<button id="medium" class="button" onclick="myJsFunction2(this.id)">Medium</button>
+	</div>
+
+	<div id="gridContainer">
+
+
+
+	<canvas id="1" class="gridBox" width=200 height=200></canvas>
+	<canvas id="2" class="gridBox" width=200 height=200></canvas>
+	<canvas id="3" class="gridBox" width=200 height=200></canvas>
+	</br>
+	<canvas id="4" class="gridBox" width=200 height=200></canvas>
+	<canvas id="5" class="gridBox" width=200 height=200></canvas>
+	<canvas id="6" class="gridBox" width=200 height=200></canvas>
+	</br>
+	<canvas id="7" class="gridBox" width=200 height=200></canvas>
+	<canvas id="8" class="gridBox" width=200 height=200></canvas>
+	<canvas id="9" class="gridBox" width=200 height=200></canvas>
+
+</div>
+
+	<button id="restart" class="button" onclick="window.location='/game.html'">Restart</button>
+<!-- 	<button id="restart" class="button" onclick="window.location='/Users/Harout/Desktop/game.html'">Restart</button>
+ -->
+</div>
+
+<script>
+var lastMove;
+var gameMode;
+var level;
+var counter = 0;
+var emptyBoxes = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+var usedBoxes = [];
+var X = [];
+var O = [];
+var corners = [1, 3, 7, 9];
+var edges = [2, 4, 6, 8];
+var winnningCombinations = [];
+winnningCombinations.push([1,2,3]);
+winnningCombinations.push([4,5,6]);
+winnningCombinations.push([7,8,9]);
+winnningCombinations.push([1,4,7]);
+winnningCombinations.push([2,5,8]);
+winnningCombinations.push([3,6,9]);
+winnningCombinations.push([1,5,9]);
+winnningCombinations.push([3,5,7]);
+
+$("#gridContainer").hide();
+$("#restart").hide();
+$("#chooseLevel").hide();
+
+
+function myJsFunction1(id) {
+	$("#startButtons").hide();
+	$("#chooseLevel").show();
+	gameMode = id;
+}
+
+function myJsFunction2(id) {
+	level = id;
+
+	runGame();
+
+}
+
+function drawCircle(ctx) {
+	ctx.clearRect(0, 0, 200, 200);
+	ctx.beginPath();
+	ctx.arc(100, 100, 50, 0, 2 * Math.PI)
+	ctx.stroke();
+}
+function drawX(ctx) {
+	ctx.clearRect(0, 0, 200, 200);
+	ctx.beginPath();
+	ctx.moveTo(50,50);
+	ctx.lineTo(150,150);
+	ctx.stroke();
+	ctx.moveTo(150,50);
+	ctx.lineTo(50,150);
+	ctx.stroke();
+}
+
+function checkForWinner(myList, candidate) {
+
+	for (var i = 0; i <winnningCombinations.length; i++) {
+		var rowCount = 0;
+		for (var j = 0; j <winnningCombinations[i].length; j++) {
+			if (myList.includes(winnningCombinations[i][j])) {
+				rowCount++;
+			}
+
+		}
+		if (rowCount == 3) {
+			alert(candidate + " is the winner!")
+			window.location='/game.html';
+			//window.location='/Users/Harout/Desktop/game.html';
+			break;
+	}
+		} 
+
+}
+
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
+}
+
+function pickBestCell() {
+	var cellNum;
+	var tryCellNum;
+	if (lastMove == "5") {
+		tryCellNum = corners[getRandomIntInclusive(0, corners.length)]
+		var tryCell = $("#" + tryCellNum);
+		if (!(tryCell.hasClass("clicked"))) {
+				var index = corners.indexOf(tryCell);
+				if (index > -1) {
+  				corners.splice(index, 1);
+				}
+				return tryCell;
+		}
+
+	} else if (lastMove == )
+}
+
+function pickRandomCell() {
+	var randomIndex = getRandomIntInclusive(0, emptyBoxes.length-1)
+				// alert(randomIndex);
+				// alert(emptyBoxes);
+	cellNum = emptyBoxes[randomIndex];
+	return cellNum;
+}
+
+function computersTurn() {
+
+
+				if (gameMode == "AI") {
+					var cellNum;
+					// alert(emptyBoxes.length);
+
+					if (level == "easy") {
+						cellNum = pickRandomCell();
+
+					} else if (level == "medium") {
+						cellNum = pickBestCell();
+					}
+				
+
+
+				c = $("#" + cellNum)[0];
+				ctx = c.getContext("2d");
+				even = (counter % 2 == 0);
+
+				if (!($(c).hasClass("clicked"))) {
+					if (even) {
+					drawCircle(ctx);
+					counter++;
+					$(c).addClass("clicked");
+					O.push(parseInt(c.id));
+					setTimeout(function() {checkForWinner(O, "O");}, 1000);
+					usedBoxes.push(c.id);
+					var index = emptyBoxes.indexOf((parseInt(c.id)));
+					if (index > -1) {
+    				emptyBoxes.splice(index, 1);
+					}
+					// alert(emptyBoxes);
+
+				} else {
+					drawX(ctx);
+					counter++;
+					$(c).addClass("clicked");
+					X.push(parseInt(c.id));
+					setTimeout(function() {checkForWinner(X, "X");}, 1000);
+					usedBoxes.push(c.id);
+					var index = emptyBoxes.indexOf((parseInt(c.id)));
+					if (index > -1) {
+    				emptyBoxes.splice(index, 1);
+					}
+				}
+				
+			}
+						
+					
+
+
+}
+}
+
+function runGame() {
+	$("#gridContainer").show();
+	$("#restart").show();
+	$("#chooseLevel").hide();
+
+		$("#gridContainer").click(function (event) {
+
+
+			var c = $("#" + event.target.id)[0];
+			var ctx = c.getContext("2d");
+
+			var even = (counter % 2 == 0);
+
+
+			if (!($(c).hasClass("clicked"))) {
+				if (even) {
+					drawCircle(ctx);
+					counter++;
+					$(c).addClass("clicked");
+					O.push(parseInt(c.id));
+					//setTimeout(function() {checkForWinner(O, "O");}, 1000);
+					checkForWinner(O, "O")
+					usedBoxes.push(c.id);
+					lastMove = c.id;
+					var index = emptyBoxes.indexOf((parseInt(c.id)));
+					if (index > -1) {
+    				emptyBoxes.splice(index, 1);
+					}
+					// alert(emptyBoxes);
+					if (emptyBoxes.length != 0) {
+					computersTurn();
+					}
+
+				} else {
+					drawX(ctx);
+					counter++;
+					$(c).addClass("clicked");
+					X.push(parseInt(c.id));
+					//setTimeout(function() {checkForWinner(X, "X");}, 1000);
+					checkForWinner(X, "X")
+					usedBoxes.push(c.id);
+					lastMove = c.id;
+					var index = emptyBoxes.indexOf((parseInt(c.id)));
+					if (index > -1) {
+    				emptyBoxes.splice(index, 1);
+					}
+					if (emptyBoxes.length != 0) {
+					computersTurn();
+					}
+				}
+
+				
+			}
+
+
+			// if (gameMode.equals("AI")) {
+			// 	alert("in AI");
+			// 	var cellNum = emptyBoxes[getRandomIntInclusive(0, emptyBoxes.length)];
+			// 	var cell = ("#" + cellNum);
+			// 	c = cell[0];
+			// 	ctx = c.getContext("2d");
+			// 	even = (counter % 2 == 0);
+
+			// 	if (!($(c).hasClass("clicked"))) {
+			// 		alert(counter);
+			// 		if (even) {
+			// 			drawCircle(ctx);
+			// 			counter++;
+			// 			$(c).addClass("clicked");
+			// 			O.push(parseInt(c.id));
+			// 			setTimeout(function() {checkForWinner(O, "O");}, 1000);
+			// 			usedBoxes.push(c.id);
+			// 			var index = emptyBoxes.indexOf((parseInt(c.id)));
+			// 			if (index > -1) {
+	  //   				array.splice(index, 1);
+			// 			}
+
+			// 		} else {
+			// 			drawX(ctx);
+			// 			counter++;
+			// 			$(c).addClass("clicked");
+			// 			X.push(parseInt(c.id));
+			// 			setTimeout(function() {checkForWinner(X, "X");}, 1000);
+			// 			usedBoxes.push(c.id);
+			// 			if (index > -1) {
+	  //   				array.splice(index, 1);
+			// 			}
+			// 		}
+				
+			// }
+				
+			// }
+
+		})
+}
+	
+</script>
+
+</body>
+
+<style>
+
+/*	.pageContainer {
+		max-height: 600px;
+		max-width: 800px;
+	}*/
+
+	.button {
+		background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+
+	}
+
+	.gridBox {
+		border-style: solid;
+/*		padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;*/
+	}
+
+	#gridContainer {
+		padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+/*    height: 600px;
+    width: 800px;*/
+	}
+
+	#restart {
+		padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 600px;
+	}
+
+
+	#startButtons {
+		padding: 0;
+    margin: auto;
+    display: block;
+    width: 800px;
+    height: 600px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+	}
+
+</style>
+
+</html>
